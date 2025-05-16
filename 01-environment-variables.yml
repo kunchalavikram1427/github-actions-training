@@ -1,0 +1,30 @@
+name: Environment Variables Example
+
+on:
+  push:
+
+env: # Workflow-level environment variable
+  WORKFLOW_ENV: "I am set at the workflow level"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env: # Job-level environment variable
+      JOB_ENV: "I am set at the job level"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Print all environment variables
+        run: env
+
+      - name: Use all environment levels
+        env: # Step-level environment variable (overrides job/workflow if keys match)
+          STEP_ENV: "I am set at the step level"
+          JOB_ENV: "I override the job-level value"
+        run: |
+          echo "WORKFLOW_ENV: $WORKFLOW_ENV"
+          echo "JOB_ENV: $JOB_ENV"
+          echo "STEP_ENV: $STEP_ENV"

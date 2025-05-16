@@ -1,0 +1,28 @@
+name: GitHub Context Example
+
+on:
+  push:
+
+jobs:
+  context-demo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Show GitHub context variables
+        run: |
+          echo "Actor: ${{ github.actor }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "Event Name: ${{ github.event_name }}"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Job: ${{ github.job }}"
+          echo "Run ID: ${{ github.run_id }}"
+          echo "Run Number: ${{ github.run_number }}"
+
+      - name: Simulate a command
+        run: echo "Doing some work..."
+
+      - name: Show job status
+        if: always() # ensures this step runs even if previous steps fail
+        run: echo "Job status: ${{ job.status }}"

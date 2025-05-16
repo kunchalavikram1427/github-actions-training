@@ -1,0 +1,15 @@
+name: GitHub Actions Demo
+run-name: Run ${{ github.run_number }} triggered by ${{ github.event_name }} event
+on: [push]
+env: 
+  SONAR_URL:  ${{ vars.SONAR_URL }}
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone
+        uses: actions/checkout@v4
+      - name: Print variable
+        run: | 
+          echo ${{ vars.SONAR_URL }}
+          echo ${{ env.SONAR_URL }}
