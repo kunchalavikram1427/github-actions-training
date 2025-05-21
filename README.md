@@ -41,3 +41,9 @@ The actions inside your workflow are the standalone commands that are executed. 
 
 ### Create a workflow
 To create a workflow, you add actions to a `.yml` file in the `.github/workflows` directory in your GitHub repository.
+
+
+## Links
+
+- https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows
+- https://docs.github.com/en/webhooks/webhook-events-and-payloads#pull_request

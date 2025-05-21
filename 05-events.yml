@@ -1,0 +1,67 @@
+name: Handle Release PR Events
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+
+  issue_comment:
+    types: [created, edited]
+
+  pull_request_review:
+    types: [submitted, edited, dismissed]
+
+  pull_request_review_comment:
+    types: [created, edited, deleted]
+
+jobs:
+  handle-release-pr:
+    if: |
+      (github.event_name == 'pull_request' && startsWith(github.head_ref, 'release/')) ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request) ||
+      (github.event_name == 'pull_request_review') ||
+      (github.event_name == 'pull_request_review_comment')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dump full event
+        run: echo '${{ toJson(github.event) }}'
+      - name: Show context info
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Action: ${{ github.event.action }}"
+          echo "Repository: ${{ github.repository }}"
+
+      - name: Handle pull_request event
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "PR Title: ${{ github.event.pull_request.title }}"
+          echo "PR Body: ${{ github.event.pull_request.body }}"
+          echo "PR From: ${{ github.head_ref }} to ${{ github.base_ref }}"
+
+      - name: Handle issue_comment event
+        if: github.event_name == 'issue_comment'
+        run: |
+          echo "Commenter: ${{ github.event.comment.user.login }}"
+          echo "Comment: ${{ github.event.comment.body }}"
+          echo "On PR: #${{ github.event.issue.number }}"
+
+      - name: Handle pull_request_review event
+        if: github.event_name == 'pull_request_review'
+        run: |
+          echo "Reviewer: ${{ github.event.review.user.login }}"
+          echo "Review state: ${{ github.event.review.state }}"
+          echo "Review body: ${{ github.event.review.body }}"
+
+      # - name: Handle pull_request_review_comment event
+      #   if: github.event_name == 'pull_request_review_comment'
+      #   run: |
+      #     echo "Inline Commenter: ${{ github.event.comment.user.login }}"
+      #     echo "Path: ${{ github.event.comment.path }}"
+      #     echo "Line: ${{ github.event.comment.line }}"
+      #     echo "Comment: ${{ github.event.comment.body }}"
