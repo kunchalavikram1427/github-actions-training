@@ -42,7 +42,36 @@ The actions inside your workflow are the standalone commands that are executed. 
 ### Create a workflow
 To create a workflow, you add actions to a `.yml` file in the `.github/workflows` directory in your GitHub repository.
 
+### Few REST APIs
+```
+Download Artifact via REST API:
+https://docs.github.com/en/rest/actions/artifacts?apiVersion=2022-11-28
 
+List artifacts for a repository:
+curl -L \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer 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" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/repos/devopsmadeeasy2021/spring-petclinic/actions/artifacts
+  
+Download an artifact: 
+curl -L \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer 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" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/repos/devopsmadeeasy2021/spring-petclinic/actions/artifacts/1183150752/zip
+ 
+List workflow run artifacts: 
+curl -L \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer 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" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/repos/devopsmadeeasy2021/spring-petclinic/actions/runs/7595787948/artifacts
+
+
+curl -X GET -H "Authorization: Bearer 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" "https://api.github.com/repos/devopsmadeeasy2021/spring-petclinic/actions/workflows/Java/runs?branch=main"
+
+```
 ## Links
 
 - https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows
