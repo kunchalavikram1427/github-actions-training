@@ -1,0 +1,77 @@
+name: Java
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+env:
+  IMAGE_NAME: "test-springboot-app"
+  DOCKERHUB_USERNAME: "kunchalavikram"	  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout SCM
+      uses: actions/checkout@v3
+    - name: list workspace contents
+      run: ls -al ${{ github.workspace }}
+    - name: Setup Java and Maven
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin' 
+        java-version: '17'
+    - name: Package the Application
+      run: |
+        mvn -B package
+        ls -al ${{ github.workspace }}/target
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: jar-file
+        path: target/*.jar
+        if-no-files-found: 'error'
+        retention-days: 1 day
+
+  dockerize:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Checkout SCM
+      uses: actions/checkout@v3
+    - name: Download Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: jar-file
+        path: target
+    - name: Check the JAR file
+      run: ls -al ${{ github.workspace }}/target		  
+    - name: Dockerize the Application
+      run: docker build -t ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:${{ github.run_number }} .
+    - name: Save the image
+      run: docker save ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:${{ github.run_number }} > ${{ github.workspace }}/${{ env.IMAGE_NAME}}.tar 
+    - name: Upload tar file
+      uses: actions/upload-artifact@v4
+      with:
+        name: tar-file
+        path: ${{ github.workspace }}/${{ env.IMAGE_NAME}}.tar 
+        if-no-files-found: 'error'
+        retention-days: 1 day
+
+  push_to_dockerhub:
+    runs-on: ubuntu-latest
+    needs: dockerize
+    steps:
+    - name: Download tar file
+      uses: actions/download-artifact@v4
+      with:
+        name: tar-file
+    - name: Load the image
+      run: docker load < ${{ github.workspace }}/${{ env.IMAGE_NAME}}.tar
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ env.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Push the image
+      run: docker push ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME}}:${{ github.run_number }}
