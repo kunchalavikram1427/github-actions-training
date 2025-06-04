@@ -1,0 +1,63 @@
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - id: get_version
+        run: echo "version=1.0.0" >> "$GITHUB_OUTPUT"
+
+  job2:
+    needs: job1
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Using version ${{ needs.job1.outputs.version }}"
+
+---
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      artifact_name: ${{ steps.set_output.outputs.name }}
+    steps:
+      - name: Set output
+        id: set_output
+        run: echo "name=build-artifact-v1" >> $GITHUB_OUTPUT
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Use job output
+        run: echo "Artifact from build: ${{ needs.build.outputs.artifact_name }}"
+
+---
+
+name: Job Outputs Demo
+
+on:
+  workflow_dispatch:  # Allows you to manually trigger this workflow
+
+jobs:
+  job1:
+    name: Generate Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}  # Define job output
+
+    steps:
+      - name: Generate version
+        id: get_version  # Required to access step outputs
+        run: |
+          VERSION="1.0.${{ github.run_number }}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT  # Set the output
+
+  job2:
+    name: Use Version
+    needs: job1  # Makes job2 wait for job1 and access its outputs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print version from job1
+        run: echo "Using version ${{ needs.job1.outputs.version }}"
